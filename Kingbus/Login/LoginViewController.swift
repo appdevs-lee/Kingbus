@@ -60,6 +60,7 @@ final class LoginViewController: UIViewController {
         button.setTitleColor(.useRGB(red: 46, green: 45, blue: 45), for: .normal)
         button.setTitleColor(.useRGB(red: 46, green: 45, blue: 45, alpha: 0.5), for: .highlighted)
         button.titleLabel?.font = .useFont(ofSize: 14, weight: .Medium)
+        button.addTarget(self, action: #selector(noLoginButton(_:)), for: .touchUpInside)
         button.translatesAutoresizingMaskIntoConstraints = false
         
         return button
@@ -192,6 +193,13 @@ extension LoginViewController {
         self.navigationController?.pushViewController(vc, animated: true)
         
     }
+    
+    @objc func noLoginButton(_ sender: UIButton) {
+        let vc = CustomizedTabBarController()
+        
+        self.present(vc, animated: false)
+    }
+    
 }
 
 // MARK: - Extension for UIGestureRecognizerDelegate

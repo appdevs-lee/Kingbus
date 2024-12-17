@@ -19,6 +19,7 @@ final class MainViewController: UIViewController {
         self.setNotificationCenters()
         self.setSubviews()
         self.setLayouts()
+        self.setUpNavigationItem()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -74,6 +75,29 @@ extension MainViewController: EssentialViewMethods {
     func setViewAfterTransition() {
         //self.navigationController?.setNavigationBarHidden(false, animated: true)
         //self.tabBarController?.tabBar.isHidden = false
+    }
+    
+    
+    func setUpNavigationItem() {
+        self.view.backgroundColor = .useRGB(red: 223, green: 52, blue: 52)
+        
+        let appearance = UINavigationBarAppearance()
+        appearance.configureWithTransparentBackground()
+        appearance.backgroundColor = .clear // Navigation bar is transparent and root view appears on it.
+        appearance.titleTextAttributes = [
+            NSAttributedString.Key.foregroundColor:UIColor.useRGB(red: 66, green: 66, blue: 66),
+            .font:UIFont.useFont(ofSize: 18, weight: .Bold)
+        ]
+        
+        // MARK: NavigationItem appearance for each view controller
+        self.navigationItem.scrollEdgeAppearance = appearance
+        self.navigationItem.standardAppearance = appearance
+        self.navigationItem.compactAppearance = appearance
+        
+        self.navigationItem.title = ""
+        
+        self.navigationItem.leftBarButtonItem = UIBarButtonItem(image: UIImage(named: "kingbus.word.icon")?.withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: nil)
+        self.navigationItem.rightBarButtonItem = UIBarButtonItem(image: UIImage(named: "notificationIcon")?.withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: nil)
     }
 }
 

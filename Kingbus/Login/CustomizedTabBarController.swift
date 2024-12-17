@@ -68,6 +68,7 @@ extension CustomizedTabBarController {
         appearance.backgroundColor = .white
         appearance.shadowColor = .clear
         
+        self.tabBar.tintColor = .useRGB(red: 46, green: 45, blue: 45)
         self.tabBar.standardAppearance = appearance
         self.tabBar.scrollEdgeAppearance = self.tabBar.standardAppearance
         

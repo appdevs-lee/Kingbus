@@ -225,20 +225,25 @@ final class RegisterUserInfoViewController: UIViewController {
     
     lazy var completeRegisterButton: UIButton = {
         let button = UIButton()
+        button.isHidden = true
         button.setTitle("완료", for: .normal)
         button.setTitleColor(.white, for: .normal)
         button.setTitleColor(.useRGB(red: 255, green: 255, blue: 255, alpha: 0.5), for: .highlighted)
         button.titleLabel?.font = .useFont(ofSize: 16, weight: .Bold)
         button.backgroundColor = .useRGB(red: 223, green: 52, blue: 52)
+        button.addTarget(self, action: #selector(completeRegisterButton(_:)), for: .touchUpInside)
         button.translatesAutoresizingMaskIntoConstraints = false
         
         return button
     }()
     
+    let loginModel = LoginModel()
+    
     var timer: Timer?
     var timerNum: Int = 0
     
     var baseViewTopAnchorConstraint: NSLayoutConstraint!
+    var completeRegisterButtonBottomAnchorConstraint: NSLayoutConstraint!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -307,6 +312,7 @@ extension RegisterUserInfoViewController: EssentialViewMethods {
             self.authenticationBaseView,
             self.authenticationCheckButton,
             self.authenticationDoneImageView,
+            self.completeRegisterButton,
         ], to: self.baseView)
         
         SupportingMethods.shared.addSubviews([
@@ -427,6 +433,15 @@ extension RegisterUserInfoViewController: EssentialViewMethods {
             self.authenticationImageView.heightAnchor.constraint(equalToConstant: 16),
             self.authenticationImageView.widthAnchor.constraint(equalToConstant: 16),
         ])
+        
+        // completeRegisterButton
+        self.completeRegisterButtonBottomAnchorConstraint = self.completeRegisterButton.bottomAnchor.constraint(equalTo: self.view.bottomAnchor)
+        NSLayoutConstraint.activate([
+            self.completeRegisterButton.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor),
+            self.completeRegisterButton.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor),
+            self.completeRegisterButtonBottomAnchorConstraint,
+            self.completeRegisterButton.heightAnchor.constraint(equalToConstant: 52),
+        ])
     }
     
     func setViewAfterTransition() {
@@ -470,6 +485,52 @@ extension RegisterUserInfoViewController {
         //1초 간격 타이머 시작
         self.timer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(timerCallback), userInfo: nil, repeats: true)
     }
+    
+    // MARK: API
+    func sendCodeDataRequest(phoneNumber: String, success: (() -> ())?) {
+        self.loginModel.sendCodeDataRequest(phoneNumber: phoneNumber) {
+            success?()
+            
+        } failure: { message in
+            SupportingMethods.shared.checkExpiration {
+                print("sendCodeDataRequest API Error: \(message)")
+                SupportingMethods.shared.turnCoverView(.off)
+                
+            }
+        }
+
+    }
+    
+    func verifyCodeDataRequest(phoneNumber: String, code: Int, success: ((Bool) -> ())?) {
+        self.loginModel.verifyCodeDataRequest(phoneNumber: phoneNumber, code: code) { isSame in
+            success?(isSame)
+            
+        } failure: { message in
+            SupportingMethods.shared.checkExpiration {
+                print("verifyCodeDataRequest API Error: \(message)")
+                SupportingMethods.shared.turnCoverView(.off)
+                
+            }
+        }
+
+        
+    }
+    
+    func loginUserDataRequest(name: String, phoneNumber: String, success: (() -> ())?) {
+        self.loginModel.loginUserDataRequest(name: name, phoneNumber: phoneNumber) { _ in
+            success?()
+            
+        } failure: { message in
+            SupportingMethods.shared.checkExpiration {
+                print("loginUserDataRequest API Error: \(message)")
+                SupportingMethods.shared.turnCoverView(.off)
+                
+            }
+            
+        }
+
+    }
+    
 }
 
 // MARK: - Extension for selector methods
@@ -481,20 +542,23 @@ extension RegisterUserInfoViewController {
     
     @objc func authenticationRequestButton(_ sender: UIButton) {
         // FIXME: 인증번호 요청 API
-        if self.timerNum < 170 {
-            print("authenticationRequestButton")
-            self.authenticationRequestButton.setTitle("재요청", for: .normal)
-            
-            self.authenticationBaseView.isHidden = false
-            
-            self.authenticationAlertStackView.isHidden = true
-            self.authenticationTextField.layer.borderWidth = 0.0
-            
-            self.authenticationDoneImageView.isHidden = true
-            self.authenticationCheckButton.isHidden = false
-            
-            self.authenticationTextField.becomeFirstResponder()
-            self.startTimer()
+        self.sendCodeDataRequest(phoneNumber: self.phoneNumberTextField.text!) {
+            if self.timerNum < 170 {
+                print("authenticationRequestButton")
+                self.authenticationRequestButton.setTitle("재요청", for: .normal)
+                
+                self.authenticationBaseView.isHidden = false
+                
+                self.authenticationAlertStackView.isHidden = true
+                self.authenticationTextField.layer.borderWidth = 0.0
+                
+                self.authenticationDoneImageView.isHidden = true
+                self.authenticationCheckButton.isHidden = false
+                
+                self.authenticationTextField.becomeFirstResponder()
+                self.startTimer()
+                
+            }
             
         }
 
@@ -503,22 +567,37 @@ extension RegisterUserInfoViewController {
     @objc func authenticationCheckButton(_ sender: UIButton) {
         print("authenticationCheckButton")
         let validNumber = "123456"
+        self.verifyCodeDataRequest(phoneNumber: self.phoneNumberTextField.text!, code: Int(self.authenticationTextField.text!)!) { isSame in
+            if isSame {
+                // 인증번호 일치
+                self.authenticationAlertStackView.isHidden = true
+                self.authenticationTextField.layer.borderWidth = 0.0
+                
+                self.authenticationDoneImageView.isHidden = false
+                self.authenticationCheckButton.isHidden = true
+                
+                self.completeRegisterButton.isHidden = false
+                
+            } else {
+                // 인증번호 불일치
+                self.authenticationAlertStackView.isHidden = false
+                self.authenticationTextField.layer.borderWidth = 1.0
+                
+                self.authenticationDoneImageView.isHidden = true
+                self.authenticationCheckButton.isHidden = false
+                
+                self.completeRegisterButton.isHidden = true
+            }
+            
+        }
         
-        if validNumber == "\(self.authenticationTextField.text!)" {
-            // 인증번호 일치
-            self.authenticationAlertStackView.isHidden = true
-            self.authenticationTextField.layer.borderWidth = 0.0
+    }
+    
+    @objc func completeRegisterButton(_ sender: UIButton) {
+        self.loginUserDataRequest(name: self.nameTextField.text!, phoneNumber: self.phoneNumberTextField.text!) {
+            let vc = CustomizedTabBarController()
             
-            self.authenticationDoneImageView.isHidden = false
-            self.authenticationCheckButton.isHidden = true
-            
-        } else {
-            // 인증번호 불일치
-            self.authenticationAlertStackView.isHidden = false
-            self.authenticationTextField.layer.borderWidth = 1.0
-            
-            self.authenticationDoneImageView.isHidden = true
-            self.authenticationCheckButton.isHidden = false
+            self.present(vc, animated: false)
             
         }
         
@@ -545,27 +624,24 @@ extension RegisterUserInfoViewController {
     
     @objc func keyboardWillShow(_ notification: Notification) {
         if let keyboardSize = (notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue,
-            let duration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double {
+            let _ = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double {
             
             UIView.transition(with: self.view, duration: 1.0) {
-//                let keyboardYValue = (ReferenceValues.Size.Device.height - ReferenceValues.Size.StatusBar.height) - keyboardSize.height
-//                let authenticationYValue = self.authenticationTextField.frame.maxY
-//                
-//                if self.authenticationTextField.isEditing {
-//                    if (keyboardYValue - authenticationYValue) < 0 {
-//                        self.baseViewTopAnchorConstraint.constant += (keyboardYValue - authenticationYValue)
-//                        
-//                    }
-//                    
-//                }
-                if self.authenticationTextField.isEditing && self.authenticationTextField.text == "" {
-                    self.baseViewTopAnchorConstraint.constant -= 112
-                    
-                    self.view.layoutIfNeeded()
+                if self.baseViewTopAnchorConstraint.constant == 0 {
+                    if self.authenticationTextField.isEditing && self.authenticationTextField.text == "" {
+                        self.baseViewTopAnchorConstraint.constant -= 112
+                        
+                        self.view.layoutIfNeeded()
+                        
+                    }
                     
                 }
                 
             }
+            
+            self.completeRegisterButtonBottomAnchorConstraint.constant = -keyboardSize.height
+            
+            
         }
     }
     
@@ -606,7 +682,7 @@ extension RegisterUserInfoViewController: UITextFieldDelegate {
             }
             
         } else if textField == self.authenticationTextField {
-            if self.authenticationTextField.text!.count < 6 {
+            if self.authenticationTextField.text!.count < 4 {
                 return true
                 
             } else {
@@ -651,6 +727,9 @@ extension RegisterUserInfoViewController: UITextFieldDelegate {
             self.authenticationCheckButton.backgroundColor = .useRGB(red: 219, green: 219, blue: 219)
             
         }
+        
+        // 뭔가 변경 시에 무조건 재인증
+        self.completeRegisterButton.isHidden = true
         
     }
     

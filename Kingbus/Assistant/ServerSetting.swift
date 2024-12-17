@@ -22,7 +22,7 @@ struct ServerSetting {
         var URL: String {
             switch self {
             case .DEV:
-                return ""
+                return "http://35.232.227.58"
                 
             case .QA:
                 return ""
