@@ -127,7 +127,7 @@ extension CustomizedTabBarController: UITabBarControllerDelegate {
             
         }
         
-        if tabBarController.selectedIndex == 3 {
+        if tabBarController.selectedIndex == 2 {
             print("프로필")
             
         }
