@@ -61,6 +61,8 @@ extension CustomizedTabBarController {
         self.delegate = self
         self.tabBar.layer.borderWidth = 0
         self.tabBar.layer.cornerRadius = 24
+        self.tabBar.layer.borderColor = UIColor.useRGB(red: 241, green: 241, blue: 241).cgColor
+        self.tabBar.layer.borderWidth = 1.0
         
         // FIXME: 스크롤 시, 탭바 변경되는 부분에 대해서 체크 필요함.
         let appearance = UITabBarAppearance()

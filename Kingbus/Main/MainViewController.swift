@@ -119,6 +119,117 @@ final class MainViewController: UIViewController {
         return view
     }()
     
+    lazy var locationTitleImageView: UIImageView = {
+        let imageView = UIImageView()
+        imageView.image = .useCustomImage("locationIcon")
+        imageView.clipsToBounds = true
+        imageView.contentMode = .scaleAspectFill
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        
+        return imageView
+    }()
+    
+    lazy var locationTitleLabel: UILabel = {
+        let label = UILabel()
+        label.text = "출/도착지를 알려 주세요"
+        label.textColor = .useRGB(red: 46, green: 45, blue: 45)
+        label.font = .useFont(ofSize: 16, weight: .Bold)
+        label.translatesAutoresizingMaskIntoConstraints = false
+        
+        return label
+    }()
+    
+    lazy var textFieldBaseView: UIView = {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        
+        return view
+    }()
+    
+    lazy var departureTextField: UITextField = {
+        let textField = UITextField()
+        textField.borderStyle = .none
+        textField.setPlaceholder(placeholder: "출발지")
+        textField.textColor = .useRGB(red: 46, green: 45, blue: 45)
+        textField.font = .useFont(ofSize: 14, weight: .Regular)
+        textField.backgroundColor = .useRGB(red: 248, green: 248, blue: 248)
+        textField.layer.cornerRadius = 8
+        textField.addLeftPadding()
+        textField.translatesAutoresizingMaskIntoConstraints = false
+        
+        return textField
+    }()
+    
+    lazy var departureButton: UIButton = {
+        let button = UIButton()
+        button.addTarget(self, action: #selector(departureButton(_:)), for: .touchUpInside)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        
+        return button
+    }()
+    
+    lazy var changeTextButtton: UIButton = {
+        let button = UIButton()
+        button.setImage(.useCustomImage("changeTextButtonImage"), for: .normal)
+        button.addTarget(self, action: #selector(changeTextButtton(_:)), for: .touchUpInside)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        
+        return button
+    }()
+    
+    lazy var arrivalTextField: UITextField = {
+        let textField = UITextField()
+        textField.borderStyle = .none
+        textField.setPlaceholder(placeholder: "도착지")
+        textField.textColor = .useRGB(red: 46, green: 45, blue: 45)
+        textField.font = .useFont(ofSize: 14, weight: .Regular)
+        textField.backgroundColor = .useRGB(red: 248, green: 248, blue: 248)
+        textField.layer.cornerRadius = 8
+        textField.addLeftPadding()
+        textField.translatesAutoresizingMaskIntoConstraints = false
+        
+        return textField
+    }()
+    
+    lazy var arrivalButton: UIButton = {
+        let button = UIButton()
+        button.addTarget(self, action: #selector(arrivalButton(_:)), for: .touchUpInside)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        
+        return button
+    }()
+    
+    lazy var searchBackgroundView: UIView = {
+        let view = UIView()
+        view.isHidden = true
+        view.backgroundColor = .useRGB(red: 0, green: 0, blue: 0, alpha: 0.75)
+        view.translatesAutoresizingMaskIntoConstraints = false
+        
+        return view
+    }()
+    
+    lazy var searchBaseView: UIView = {
+        let view = UIView()
+        view.isHidden = true
+        view.backgroundColor = .white
+        view.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
+        view.layer.cornerRadius = 24
+        view.translatesAutoresizingMaskIntoConstraints = false
+        
+        return view
+    }()
+    
+    lazy var searchTextField: UITextField = {
+        let textField = UITextField()
+        textField.textColor = .useRGB(red: 46, green: 45, blue: 45)
+        textField.font = .useFont(ofSize: 14, weight: .Regular)
+        textField.translatesAutoresizingMaskIntoConstraints = false
+        
+        return textField
+    }()
+    
+    var searchBaseViewBottomAnchorConstraint: NSLayoutConstraint!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -166,12 +277,16 @@ extension MainViewController: EssentialViewMethods {
     }
     
     func setNotificationCenters() {
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(_:)), name: UIResponder.keyboardWillShowNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(_:)), name: UIResponder.keyboardWillHideNotification, object: nil)
         
     }
     
     func setSubviews() {
         SupportingMethods.shared.addSubviews([
             self.scrollView,
+            self.searchBackgroundView,
+            self.searchBaseView,
         ], to: self.view)
         
         SupportingMethods.shared.addSubviews([
@@ -201,8 +316,20 @@ extension MainViewController: EssentialViewMethods {
         ], to: self.accumulatedEstimateBaseView)
         
         SupportingMethods.shared.addSubviews([
-        
+            self.locationTitleImageView,
+            self.locationTitleLabel,
+            
+            self.textFieldBaseView,
+            self.departureTextField,
+            self.departureButton,
+            self.arrivalTextField,
+            self.arrivalButton,
+            self.changeTextButtton,
         ], to: self.contentBaesView)
+        
+        SupportingMethods.shared.addSubviews([
+            self.searchTextField,
+        ], to: self.searchBaseView)
     }
     
     func setLayouts() {
@@ -298,6 +425,92 @@ extension MainViewController: EssentialViewMethods {
             self.contentBaesView.topAnchor.constraint(equalTo: self.estimateCountBaseView.bottomAnchor, constant: 24),
             self.contentBaesView.bottomAnchor.constraint(equalTo: self.baseView.bottomAnchor),
         ])
+        
+        // locationTitleImageView
+        NSLayoutConstraint.activate([
+            self.locationTitleImageView.leadingAnchor.constraint(equalTo: self.contentBaesView.leadingAnchor, constant: 20),
+            self.locationTitleImageView.topAnchor.constraint(equalTo: self.contentBaesView.topAnchor, constant: 28),
+            self.locationTitleImageView.widthAnchor.constraint(equalToConstant: 24),
+            self.locationTitleImageView.heightAnchor.constraint(equalToConstant: 24),
+        ])
+        
+        // locationTitleLabel
+        NSLayoutConstraint.activate([
+            self.locationTitleLabel.leadingAnchor.constraint(equalTo: self.locationTitleImageView.trailingAnchor, constant: 8),
+            self.locationTitleLabel.centerYAnchor.constraint(equalTo: self.locationTitleImageView.centerYAnchor),
+        ])
+        
+        // textFieldBaseView
+        NSLayoutConstraint.activate([
+            self.textFieldBaseView.leadingAnchor.constraint(equalTo: self.contentBaesView.leadingAnchor, constant: 20),
+            self.textFieldBaseView.trailingAnchor.constraint(equalTo: self.contentBaesView.trailingAnchor, constant: -20),
+            self.textFieldBaseView.topAnchor.constraint(equalTo: self.locationTitleLabel.bottomAnchor, constant: 12),
+            self.textFieldBaseView.heightAnchor.constraint(equalToConstant: 104),
+        ])
+        
+        // departureTextField
+        NSLayoutConstraint.activate([
+            self.departureTextField.leadingAnchor.constraint(equalTo: self.textFieldBaseView.leadingAnchor),
+            self.departureTextField.trailingAnchor.constraint(equalTo: self.textFieldBaseView.trailingAnchor),
+            self.departureTextField.topAnchor.constraint(equalTo: self.textFieldBaseView.topAnchor),
+            self.departureTextField.heightAnchor.constraint(equalToConstant: 48),
+        ])
+        
+        // departureButton
+        NSLayoutConstraint.activate([
+            self.departureButton.leadingAnchor.constraint(equalTo: self.departureTextField.leadingAnchor),
+            self.departureButton.trailingAnchor.constraint(equalTo: self.departureTextField.trailingAnchor),
+            self.departureButton.topAnchor.constraint(equalTo: self.departureTextField.topAnchor),
+            self.departureButton.bottomAnchor.constraint(equalTo: self.departureTextField.bottomAnchor),
+        ])
+
+        // arrivalTextField
+        NSLayoutConstraint.activate([
+            self.arrivalTextField.leadingAnchor.constraint(equalTo: self.textFieldBaseView.leadingAnchor),
+            self.arrivalTextField.trailingAnchor.constraint(equalTo: self.textFieldBaseView.trailingAnchor),
+            self.arrivalTextField.topAnchor.constraint(equalTo: self.departureTextField.bottomAnchor, constant: 8),
+            self.arrivalTextField.heightAnchor.constraint(equalToConstant: 48),
+        ])
+        
+        // arrivalButton
+        NSLayoutConstraint.activate([
+            self.arrivalButton.leadingAnchor.constraint(equalTo: self.arrivalTextField.leadingAnchor),
+            self.arrivalButton.trailingAnchor.constraint(equalTo: self.arrivalTextField.trailingAnchor),
+            self.arrivalButton.topAnchor.constraint(equalTo: self.arrivalTextField.topAnchor),
+            self.arrivalButton.bottomAnchor.constraint(equalTo: self.arrivalTextField.bottomAnchor),
+        ])
+        
+        // changeTextButtton
+        NSLayoutConstraint.activate([
+            self.changeTextButtton.centerYAnchor.constraint(equalTo: self.textFieldBaseView.centerYAnchor),
+            self.changeTextButtton.centerXAnchor.constraint(equalTo: self.textFieldBaseView.centerXAnchor),
+            self.changeTextButtton.heightAnchor.constraint(equalToConstant: 28),
+            self.changeTextButtton.widthAnchor.constraint(equalToConstant: 47),
+        ])
+        
+        // searchBackgroundView
+        NSLayoutConstraint.activate([
+            self.searchBackgroundView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
+            self.searchBackgroundView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
+            self.searchBackgroundView.topAnchor.constraint(equalTo: self.view.topAnchor),
+            self.searchBackgroundView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor),
+        ])
+        
+        // searchBaseView
+        self.searchBaseViewBottomAnchorConstraint = self.searchBaseView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor)
+        NSLayoutConstraint.activate([
+            self.searchBaseView.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor),
+            self.searchBaseView.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor),
+            self.searchBaseView.heightAnchor.constraint(equalToConstant: 440),
+            self.searchBaseViewBottomAnchorConstraint,
+        ])
+        
+        // searchTextField
+        NSLayoutConstraint.activate([
+            self.searchTextField.leadingAnchor.constraint(equalTo: self.searchBaseView.leadingAnchor, constant: 20),
+            self.searchTextField.trailingAnchor.constraint(equalTo: self.searchBaseView.trailingAnchor, constant: -20),
+            self.searchTextField.topAnchor.constraint(equalTo: self.searchBaseView.topAnchor, constant: 36)
+        ])
     }
     
     func setViewAfterTransition() {
@@ -336,5 +549,56 @@ extension MainViewController {
 
 // MARK: - Extension for selector methods
 extension MainViewController {
+    @objc func departureButton(_ sender: UIButton) {
+        print("departureButton")
+        self.searchTextField.setPlaceholder(placeholder: "출발지 검색")
+        self.searchTextField.becomeFirstResponder()
+        self.searchBackgroundView.isHidden = false
+        self.searchBaseView.isHidden = false
+        
+    }
+    
+    @objc func arrivalButton(_ sender: UIButton) {
+        print("arrivalButton")
+        self.searchTextField.setPlaceholder(placeholder: "도착지 검색")
+        self.searchTextField.becomeFirstResponder()
+        self.searchBackgroundView.isHidden = false
+        self.searchBaseView.isHidden = false
+        
+    }
+    
+    @objc func changeTextButtton(_ sender: UIButton) {
+        let departure = self.departureTextField.text!
+        let arrival = self.arrivalTextField.text!
+        
+        self.departureTextField.text = arrival
+        self.arrivalTextField.text = departure
+    }
+    
+    @objc func keyboardWillShow(_ notification: Notification) {
+        if let keyboardSize = (notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue,
+            let duration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double {
+            
+            UIView.transition(with: self.view, duration: duration) {
+                self.searchBaseViewBottomAnchorConstraint.constant = -keyboardSize.height
+                
+                self.view.layoutIfNeeded()
+            }
+            
+        }
+        
+    }
+    
+    @objc func keyboardWillHide(_ notification: Notification) {
+        if let duration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double {
+            
+            UIView.transition(with: self.view, duration: duration) {
+                self.searchBaseViewBottomAnchorConstraint.constant = 0
+                
+            }
+            
+        }
+        
+    }
     
 }

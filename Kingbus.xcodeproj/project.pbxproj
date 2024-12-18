@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2D2458302D131EDF007A2A4E /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 2D24582F2D131EDF007A2A4E /* GoogleService-Info.plist */; };
 		2DC10AE12D0C8757005070D9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DC10AE02D0C8757005070D9 /* AppDelegate.swift */; };
 		2DC10AE32D0C8757005070D9 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DC10AE22D0C8757005070D9 /* SceneDelegate.swift */; };
 		2DC10AEA2D0C8758005070D9 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2DC10AE92D0C8758005070D9 /* Assets.xcassets */; };
@@ -39,6 +40,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		2D24582F2D131EDF007A2A4E /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		2DC10ADD2D0C8757005070D9 /* Kingbus.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Kingbus.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2DC10AE02D0C8757005070D9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		2DC10AE22D0C8757005070D9 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -120,6 +122,7 @@
 				2DC10AEE2D0C8758005070D9 /* Info.plist */,
 				2DC10AE02D0C8757005070D9 /* AppDelegate.swift */,
 				2DC10AE22D0C8757005070D9 /* SceneDelegate.swift */,
+				2D24582F2D131EDF007A2A4E /* GoogleService-Info.plist */,
 				2DC10AF72D0CF3D9005070D9 /* Template */,
 				2DC10AF42D0CF3AE005070D9 /* Fonts */,
 				2DC10B022D0CF3DF005070D9 /* Assistant */,
@@ -281,6 +284,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2D2458302D131EDF007A2A4E /* GoogleService-Info.plist in Resources */,
 				2DC10AED2D0C8758005070D9 /* LaunchScreen.storyboard in Resources */,
 				2DC10AEA2D0C8758005070D9 /* Assets.xcassets in Resources */,
 				2DC10AF62D0CF3B5005070D9 /* PretendardVariable.ttf in Resources */,
