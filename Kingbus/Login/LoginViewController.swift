@@ -9,6 +9,45 @@ import UIKit
 
 final class LoginViewController: UIViewController {
     
+    lazy var splashBaseView: UIView = {
+        let view = UIView()
+        view.backgroundColor = .white
+        view.translatesAutoresizingMaskIntoConstraints = false
+        
+        return view
+    }()
+    
+    lazy var splashStackView: UIStackView = {
+        let stackView = UIStackView()
+        stackView.axis = .vertical
+        stackView.spacing = 12
+        stackView.alignment = .center
+        stackView.distribution = .fill
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        
+        return stackView
+    }()
+    
+    lazy var kingbusLogoImageView: UIImageView = {
+        let imageView = UIImageView()
+        imageView.image = .useCustomImage("kingbus.logo.splash")
+        imageView.contentMode = .scaleAspectFill
+        imageView.clipsToBounds = true
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        
+        return imageView
+    }()
+    
+    lazy var splashLabel: UILabel = {
+        let label = UILabel()
+        label.text = "버스대절은 킹버스"
+        label.textColor = .useRGB(red: 101, green: 100, blue: 100)
+        label.font = .useFont(ofSize: 14, weight: .Regular)
+        label.translatesAutoresizingMaskIntoConstraints = false
+        
+        return label
+    }()
+    
     lazy var mainImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.image = .useCustomImage("loginMainImage")
@@ -66,6 +105,18 @@ final class LoginViewController: UIViewController {
         return button
     }()
     
+    let commonModel = CommonModel()
+    
+    init() {
+        super.init(nibName: nil, bundle: nil)
+        
+        self.modalPresentationStyle = .fullScreen
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -76,6 +127,7 @@ final class LoginViewController: UIViewController {
         self.setNotificationCenters()
         self.setSubviews()
         self.setLayouts()
+        self.checkPermission()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -125,12 +177,17 @@ extension LoginViewController: EssentialViewMethods {
             self.mainImageView,
             self.titleLabel,
             self.buttonBaseView,
+            self.splashBaseView,
         ], to: self.view)
         
         SupportingMethods.shared.addSubviews([
             self.loginButton,
             self.noLoginButton,
         ], to: self.buttonBaseView)
+        
+        SupportingMethods.shared.addSubviews([
+            self.splashStackView,
+        ], to: self.splashBaseView)
     }
     
     func setLayouts() {
@@ -172,6 +229,27 @@ extension LoginViewController: EssentialViewMethods {
             self.noLoginButton.topAnchor.constraint(equalTo: self.loginButton.bottomAnchor, constant: 12),
             self.noLoginButton.heightAnchor.constraint(equalToConstant: 20),
         ])
+        
+        // splashBaseView
+        NSLayoutConstraint.activate([
+            self.splashBaseView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
+            self.splashBaseView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
+            self.splashBaseView.topAnchor.constraint(equalTo: self.view.topAnchor),
+            self.splashBaseView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor),
+        ])
+        
+        // splashStackView
+        NSLayoutConstraint.activate([
+            self.splashStackView.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor, constant: 20),
+            self.splashStackView.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: -20),
+            self.splashStackView.centerYAnchor.constraint(equalTo: safeArea.centerYAnchor),
+        ])
+        
+        // kingbusLogoImageView
+        NSLayoutConstraint.activate([
+            self.kingbusLogoImageView.widthAnchor.constraint(equalToConstant: 134),
+            self.kingbusLogoImageView.heightAnchor.constraint(equalToConstant: 24),
+        ])
     }
     
     func setViewAfterTransition() {
@@ -182,6 +260,60 @@ extension LoginViewController: EssentialViewMethods {
 
 // MARK: - Extension for methods added
 extension LoginViewController {
+    func checkPermission() {
+        if ReferenceValues.isCheckPermission {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                self.splashBaseView.isHidden = true
+                
+            }
+            
+        } else {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                self.splashBaseView.isHidden = true
+                let vc = PermissionViewController()
+                
+                self.present(vc, animated: true)
+            }
+            
+        }
+        
+        
+    }
+    
+    func restart() {
+        self.splashBaseView.isHidden = false
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+            if ReferenceValues.isLoginCheck {
+                self.registerFCMTokenDataRequest {
+                    let vc = CustomizedTabBarController()
+                    
+                    self.present(vc, animated: false)
+                    
+                }
+                
+            } else {
+                self.splashBaseView.isHidden = true
+                
+            }
+            
+        }
+        
+    }
+    
+    func registerFCMTokenDataRequest(success: (() -> ())?) {
+        self.commonModel.registerFCMTokenDataRequest {
+            success?()
+            
+        } failure: { message in
+            SupportingMethods.shared.checkExpiration {
+                print("registerFCMTokenDataRequest API Error: \(message)")
+                SupportingMethods.shared.turnCoverView(.off)
+                
+            }
+            
+        }
+
+    }
     
 }
 

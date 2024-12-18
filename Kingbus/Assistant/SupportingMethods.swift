@@ -358,22 +358,28 @@ extension SupportingMethods {
         case .networkError:
             guard let _ = ReferenceValues.firstVC?.presentedViewController as? CustomizedTabBarController else {
                 ReferenceValues.firstVC?.dismiss(animated: true)
+                ReferenceValues.firstVC?.navigationController?.popToRootViewController(animated: false)
+                ReferenceValues.firstVC?.restart()
                 
                 return
             }
             
             ReferenceValues.firstVC?.dismiss(animated: false)
             ReferenceValues.firstVC?.navigationController?.popToRootViewController(animated: false)
+            ReferenceValues.firstVC?.restart()
             
         case .serverError:
             guard let _ = ReferenceValues.firstVC?.presentedViewController as? CustomizedTabBarController else {
                 ReferenceValues.firstVC?.dismiss(animated: true)
+                ReferenceValues.firstVC?.navigationController?.popToRootViewController(animated: false)
+                ReferenceValues.firstVC?.restart()
                 
                 return
             }
             
             ReferenceValues.firstVC?.dismiss(animated: false)
             ReferenceValues.firstVC?.navigationController?.popToRootViewController(animated: false)
+            ReferenceValues.firstVC?.restart()
         case .expired:
             // expired state
             

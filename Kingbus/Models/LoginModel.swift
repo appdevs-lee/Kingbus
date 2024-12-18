@@ -138,7 +138,7 @@ final class LoginModel {
                 
                 if let decodedData = try? JSONDecoder().decode(Login.self, from: data) {
                     print("loginUserDataRequest succeeded")
-                    ReferenceValues.accessToken = decodedData.data.access
+                    ReferenceValues.accessToken = "Bearer \(decodedData.data.access)"
                     ReferenceValues.refreshToken = decodedData.data.refresh
                     ReferenceValues.name = decodedData.data.username ?? ""
                     success?(decodedData.data)
@@ -187,7 +187,7 @@ final class LoginModel {
                 
                 if let decodedData = try? JSONDecoder().decode(Login.self, from: data) {
                     print("sendRefreshTokenDataReqeust succeeded")
-                    ReferenceValues.accessToken = decodedData.data.access
+                    ReferenceValues.accessToken = "Bearer \(decodedData.data.access)"
                     ReferenceValues.refreshToken = decodedData.data.refresh
                     success?(decodedData.data)
                     

@@ -6,14 +6,27 @@
 //
 
 import UIKit
+import FirebaseCore
+import FirebaseMessaging
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
-
-
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
+        
+        // MARK: Network
+        NetworkMonitor.shared.startMonitoring()
+        
+        //MARK: Firebase
+        FirebaseApp.configure()
+        Messaging.messaging().delegate = self
+        
+        // MARK: Push
+        UNUserNotificationCenter.current().delegate = self
+        
+        application.registerForRemoteNotifications()
+        
         return true
     }
 
@@ -34,3 +47,48 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 }
 
+extension AppDelegate: UNUserNotificationCenterDelegate {
+    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        Messaging.messaging().apnsToken = deviceToken
+        
+    }
+    
+    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        print("Push >> willPresent")
+        
+        guard let userInfo = notification.request.content.userInfo as? [String:Any] else {
+            completionHandler([.badge, .banner, .list])
+            
+            return
+        }
+        
+        print(userInfo)
+        completionHandler([.badge, .banner, .list])
+        
+    }
+    
+    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+        print("Push >> didReceive")
+        
+        guard let userInfo = response.notification.request.content.userInfo as? [String:Any] else {
+            completionHandler()
+            
+            return
+        }
+        
+        print(userInfo)
+        completionHandler()
+        
+    }
+    
+}
+
+extension AppDelegate: MessagingDelegate {
+    func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
+        guard let token = fcmToken else { return }
+        print("FCM 등록토큰: \(token)")
+        ReferenceValues.fcmToken = token
+        
+    }
+    
+}

@@ -238,6 +238,7 @@ final class RegisterUserInfoViewController: UIViewController {
     }()
     
     let loginModel = LoginModel()
+    let commonModel = CommonModel()
     
     var timer: Timer?
     var timerNum: Int = 0
@@ -531,6 +532,21 @@ extension RegisterUserInfoViewController {
 
     }
     
+    func registerFCMTokenDataRequest(success: (() -> ())?) {
+        self.commonModel.registerFCMTokenDataRequest {
+            success?()
+            
+        } failure: { message in
+            SupportingMethods.shared.checkExpiration {
+                print("registerFCMTokenDataRequest API Error: \(message)")
+                SupportingMethods.shared.turnCoverView(.off)
+                
+            }
+            
+        }
+
+    }
+    
 }
 
 // MARK: - Extension for selector methods
@@ -595,9 +611,15 @@ extension RegisterUserInfoViewController {
     
     @objc func completeRegisterButton(_ sender: UIButton) {
         self.loginUserDataRequest(name: self.nameTextField.text!, phoneNumber: self.phoneNumberTextField.text!) {
-            let vc = CustomizedTabBarController()
-            
-            self.present(vc, animated: false)
+            self.registerFCMTokenDataRequest {
+                let vc = CustomizedTabBarController()
+                
+                self.present(vc, animated: false) {
+                    ReferenceValues.isLoginCheck = true
+                    
+                }
+                
+            }
             
         }
         

@@ -7,4 +7,5 @@ target 'Kingbus' do
 
   # Pods for Kingbus
   pod 'Alamofire'
+  pod 'FirebaseMessaging'
 end
