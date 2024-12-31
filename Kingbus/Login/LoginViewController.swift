@@ -263,7 +263,18 @@ extension LoginViewController {
     func checkPermission() {
         if ReferenceValues.isCheckPermission {
             DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-                self.splashBaseView.isHidden = true
+                if ReferenceValues.isLoginCheck {
+                    self.registerFCMTokenDataRequest {
+                        let vc = CustomizedTabBarController()
+                        
+                        self.present(vc, animated: false)
+                        
+                    }
+                    
+                } else {
+                    self.splashBaseView.isHidden = true
+                    
+                }
                 
             }
             

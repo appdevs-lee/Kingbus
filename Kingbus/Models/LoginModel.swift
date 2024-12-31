@@ -19,7 +19,7 @@ final class LoginModel {
     private(set) var sendRefreshTokenDataReqeust: DataRequest?
     
     func sendCodeDataRequest(phoneNumber: String, success: (() -> ())?, failure: ((_ message: String) -> ())?) {
-        let url = ServerSetting.server.URL + "/user/send-code"
+        let url = ServerSetting.server.URL + "/users/codes"
         
         let headers: HTTPHeaders = [
             "accept":"application/json",
@@ -59,7 +59,7 @@ final class LoginModel {
     }
     
     func verifyCodeDataRequest(phoneNumber: String, code: Int, success: ((Bool) -> ())?, failure: ((_ message: String) -> ())?) {
-        let url = ServerSetting.server.URL + "/user/verify-code"
+        let url = ServerSetting.server.URL + "/users/codes/verify"
         
         let headers: HTTPHeaders = [
             "accept":"application/json",
@@ -106,7 +106,7 @@ final class LoginModel {
     }
     
     func loginUserDataRequest(name: String, phoneNumber: String, success: ((LoginItem) -> ())?, failure: ((_ message: String) -> ())?) {
-        let url = ServerSetting.server.URL + "/user/login"
+        let url = ServerSetting.server.URL + "/users/login"
         
         let headers: HTTPHeaders = [
             "accept":"application/json",
@@ -156,7 +156,7 @@ final class LoginModel {
     }
     
     func sendRefreshTokenDataReqeust(success: ((LoginItem) -> ())?, failure: ((_ message: String) -> ())?) {
-        let url = ServerSetting.server.URL + "/user/refresh-token"
+        let url = ServerSetting.server.URL + "/users/refresh-token"
         
         let headers: HTTPHeaders = [
             "accept":"application/json",

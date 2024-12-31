@@ -13,7 +13,7 @@ final class CommonModel {
     private(set) var registerFCMTokenDataRequest: DataRequest?
     
     func registerFCMTokenDataRequest(success: (() -> ())?, failure: ((_ message: String) -> ())?) {
-        let url = ServerSetting.server.URL + "/register/fcm-token"
+        let url = ServerSetting.server.URL + "/users/fcm-token"
         
         let headers: HTTPHeaders = [
             "accept":"application/json",
