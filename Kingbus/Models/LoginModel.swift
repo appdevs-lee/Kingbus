@@ -162,7 +162,7 @@ final class LoginModel {
             "accept":"application/json",
         ]
         
-        var parameters: Parameters = [
+        let parameters: Parameters = [
             "refresh": ReferenceValues.refreshToken,
         ]
         

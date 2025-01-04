@@ -9,6 +9,9 @@
 /* Begin PBXBuildFile section */
 		2D2458302D131EDF007A2A4E /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 2D24582F2D131EDF007A2A4E /* GoogleService-Info.plist */; };
 		2D2458342D1329D6007A2A4E /* PermissionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D2458332D1329D6007A2A4E /* PermissionViewController.swift */; };
+		2D41BEA12D27EC1000C4D6E8 /* MainModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D41BEA02D27EC1000C4D6E8 /* MainModel.swift */; };
+		2D41BEA42D27F3DB00C4D6E8 /* SearchTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D41BEA32D27F3DA00C4D6E8 /* SearchTableViewCell.swift */; };
+		2D41BEA62D28012A00C4D6E8 /* RecentSearchTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D41BEA52D28012A00C4D6E8 /* RecentSearchTableViewCell.swift */; };
 		2DC10AE12D0C8757005070D9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DC10AE02D0C8757005070D9 /* AppDelegate.swift */; };
 		2DC10AE32D0C8757005070D9 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DC10AE22D0C8757005070D9 /* SceneDelegate.swift */; };
 		2DC10AEA2D0C8758005070D9 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2DC10AE92D0C8758005070D9 /* Assets.xcassets */; };
@@ -44,6 +47,9 @@
 		2D24582F2D131EDF007A2A4E /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		2D2458332D1329D6007A2A4E /* PermissionViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionViewController.swift; sourceTree = "<group>"; };
 		2D2458352D133205007A2A4E /* Kingbus.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Kingbus.entitlements; sourceTree = "<group>"; };
+		2D41BEA02D27EC1000C4D6E8 /* MainModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainModel.swift; sourceTree = "<group>"; };
+		2D41BEA32D27F3DA00C4D6E8 /* SearchTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchTableViewCell.swift; sourceTree = "<group>"; };
+		2D41BEA52D28012A00C4D6E8 /* RecentSearchTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecentSearchTableViewCell.swift; sourceTree = "<group>"; };
 		2DC10ADD2D0C8757005070D9 /* Kingbus.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Kingbus.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2DC10AE02D0C8757005070D9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		2DC10AE22D0C8757005070D9 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -91,6 +97,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		2D41BEA22D27F3CE00C4D6E8 /* Search */ = {
+			isa = PBXGroup;
+			children = (
+				2D41BEA32D27F3DA00C4D6E8 /* SearchTableViewCell.swift */,
+				2D41BEA52D28012A00C4D6E8 /* RecentSearchTableViewCell.swift */,
+			);
+			path = Search;
+			sourceTree = "<group>";
+		};
 		2D81CAA98E6C31A84C565C20 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
@@ -191,6 +206,7 @@
 			isa = PBXGroup;
 			children = (
 				2DC10B1F2D0CF9C1005070D9 /* MainViewController.swift */,
+				2D41BEA22D27F3CE00C4D6E8 /* Search */,
 			);
 			path = Main;
 			sourceTree = "<group>";
@@ -216,6 +232,7 @@
 			children = (
 				2DD46E4B2D106B47006E6855 /* CommonModel.swift */,
 				2DD46E492D106A91006E6855 /* LoginModel.swift */,
+				2D41BEA02D27EC1000C4D6E8 /* MainModel.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -356,8 +373,10 @@
 				2DC10B092D0CF3EF005070D9 /* BottomSheetViewController.swift in Sources */,
 				2DC10B0F2D0CF3FE005070D9 /* TemplateCollectionViewCell.swift in Sources */,
 				2DC10B262D0D0847005070D9 /* RegisterUserInfoViewController.swift in Sources */,
+				2D41BEA62D28012A00C4D6E8 /* RecentSearchTableViewCell.swift in Sources */,
 				2DC10B0A2D0CF3F2005070D9 /* AlertPopViewController.swift in Sources */,
 				2DC10B142D0CF40B005070D9 /* NetworkMonitor.swift in Sources */,
+				2D41BEA42D27F3DB00C4D6E8 /* SearchTableViewCell.swift in Sources */,
 				2DC10B122D0CF407005070D9 /* SupportingMethods.swift in Sources */,
 				2DD46E4A2D106A91006E6855 /* LoginModel.swift in Sources */,
 				2DC10B102D0CF401005070D9 /* ViewPagerCollectionViewCell.swift in Sources */,
@@ -368,6 +387,7 @@
 				2DC10B0D2D0CF3F9005070D9 /* TemplateHeaderFooterView.swift in Sources */,
 				2D2458342D1329D6007A2A4E /* PermissionViewController.swift in Sources */,
 				2DC10B0C2D0CF3F7005070D9 /* TemplateViewController.swift in Sources */,
+				2D41BEA12D27EC1000C4D6E8 /* MainModel.swift in Sources */,
 				2DC10B222D0CF9C7005070D9 /* MyContractViewController.swift in Sources */,
 				2DC10B112D0CF405005070D9 /* ReferenceValues.swift in Sources */,
 				2DC10B202D0CF9C1005070D9 /* MainViewController.swift in Sources */,

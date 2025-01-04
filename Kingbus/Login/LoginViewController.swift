@@ -106,6 +106,7 @@ final class LoginViewController: UIViewController {
     }()
     
     let commonModel = CommonModel()
+    let loginModel = LoginModel()
     
     init() {
         super.init(nibName: nil, bundle: nil)
@@ -264,10 +265,13 @@ extension LoginViewController {
         if ReferenceValues.isCheckPermission {
             DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
                 if ReferenceValues.isLoginCheck {
-                    self.registerFCMTokenDataRequest {
-                        let vc = CustomizedTabBarController()
-                        
-                        self.present(vc, animated: false)
+                    self.sendRefreshTokenDataReqeust {
+                        self.registerFCMTokenDataRequest {
+                            let vc = CustomizedTabBarController()
+                            
+                            self.present(vc, animated: false)
+                            
+                        }
                         
                     }
                     
@@ -295,10 +299,13 @@ extension LoginViewController {
         self.splashBaseView.isHidden = false
         DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
             if ReferenceValues.isLoginCheck {
-                self.registerFCMTokenDataRequest {
-                    let vc = CustomizedTabBarController()
-                    
-                    self.present(vc, animated: false)
+                self.sendRefreshTokenDataReqeust {
+                    self.registerFCMTokenDataRequest {
+                        let vc = CustomizedTabBarController()
+                        
+                        self.present(vc, animated: false)
+                        
+                    }
                     
                 }
                 
@@ -318,6 +325,21 @@ extension LoginViewController {
         } failure: { message in
             SupportingMethods.shared.checkExpiration {
                 print("registerFCMTokenDataRequest API Error: \(message)")
+                SupportingMethods.shared.turnCoverView(.off)
+                
+            }
+            
+        }
+
+    }
+    
+    func sendRefreshTokenDataReqeust(success: (() -> ())?) {
+        self.loginModel.sendRefreshTokenDataReqeust { _ in
+            success?()
+            
+        } failure: { message in
+            SupportingMethods.shared.checkExpiration {
+                print("sendRefreshTokenDataReqeust API Error: \(message)")
                 SupportingMethods.shared.turnCoverView(.off)
                 
             }

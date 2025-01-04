@@ -223,12 +223,153 @@ final class MainViewController: UIViewController {
         let textField = UITextField()
         textField.textColor = .useRGB(red: 46, green: 45, blue: 45)
         textField.font = .useFont(ofSize: 14, weight: .Regular)
+        textField.backgroundColor = .useRGB(red: 248, green: 248, blue: 248)
+        textField.borderStyle = .none
+        textField.layer.cornerRadius = 8
+        textField.addLeftPadding()
+        textField.returnKeyType = .search
+        textField.delegate = self
         textField.translatesAutoresizingMaskIntoConstraints = false
         
         return textField
     }()
     
+    lazy var deleteTextButton: UIButton = {
+        let button = UIButton()
+        button.isHidden = true
+        button.setImage(.useCustomImage("deleteTextImage"), for: .normal)
+        button.addTarget(self, action: #selector(deleteTextButton(_:)), for: .touchUpInside)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        
+        return button
+    }()
+    
+    lazy var recentSearchBaseView: UIView = {
+        let view = UIView()
+        view.isHidden = true
+        view.translatesAutoresizingMaskIntoConstraints = false
+        
+        return view
+    }()
+    
+    lazy var recentSearchTitleLabel: UILabel = {
+        let label = UILabel()
+        label.text = "최근 검색"
+        label.textColor = .useRGB(red: 46, green: 45, blue: 45)
+        label.font = .useFont(ofSize: 14, weight: .Regular)
+        label.translatesAutoresizingMaskIntoConstraints = false
+        
+        return label
+    }()
+    
+    lazy var recentSearchDeleteAllButton: UIButton = {
+        let button = UIButton()
+        button.setTitle("전체 삭제", for: .normal)
+        button.setTitleColor(.useRGB(red: 148, green: 147, blue: 147), for: .normal)
+        button.titleLabel?.font = .useFont(ofSize: 12, weight: .Regular)
+        button.addTarget(self, action: #selector(recentSearchDeleteAllButton(_:)), for: .touchUpInside)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        
+        return button
+    }()
+    
+    lazy var recentSearchTableView: UITableView = {
+        let tableView = UITableView()
+        tableView.backgroundColor = .white
+        tableView.bounces = false
+        tableView.isScrollEnabled = false
+        tableView.showsVerticalScrollIndicator = false
+        tableView.register(RecentSearchTableViewCell.self, forCellReuseIdentifier: "RecentSearchTableViewCell")
+        tableView.delegate = self
+        tableView.dataSource = self
+        tableView.sectionHeaderTopPadding = 0
+        tableView.separatorStyle = .none
+        tableView.translatesAutoresizingMaskIntoConstraints = false
+        
+        return tableView
+    }()
+    
+    lazy var noResultStackView: UIStackView = {
+        let stackView = UIStackView(arrangedSubviews: [self.noResultImageView, self.noResultLabelStackView])
+        stackView.isHidden = true
+        stackView.axis = .vertical
+        stackView.spacing = 8
+        stackView.distribution = .fill
+        stackView.alignment = .center
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        
+        return stackView
+    }()
+    
+    lazy var noResultImageView: UIImageView = {
+        let imageView = UIImageView()
+        imageView.image = .useCustomImage("noResultImage")
+        imageView.contentMode = .scaleAspectFill
+        imageView.clipsToBounds = true
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        
+        return imageView
+    }()
+    
+    lazy var noResultLabelStackView: UIStackView = {
+        let stackView = UIStackView(arrangedSubviews: [self.noResultTitleLabel, self.noResultSubTitleLabel])
+        stackView.axis = .vertical
+        stackView.spacing = 2
+        stackView.distribution = .fill
+        stackView.alignment = .center
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        
+        return stackView
+    }()
+    
+    lazy var noResultTitleLabel: UILabel = {
+        let label = UILabel()
+        label.text = "검색 결과가 없어요"
+        label.textColor = .useRGB(red: 46, green: 45, blue: 45)
+        label.font = .useFont(ofSize: 16, weight: .Medium)
+        label.translatesAutoresizingMaskIntoConstraints = false
+        
+        return label
+    }()
+    
+    lazy var noResultSubTitleLabel: UILabel = {
+        let label = UILabel()
+        label.text = "다시 검색해 주세요"
+        label.textColor = .useRGB(red: 148, green: 147, blue: 147)
+        label.font = .useFont(ofSize: 14, weight: .Regular)
+        label.translatesAutoresizingMaskIntoConstraints = false
+        
+        return label
+    }()
+    
+    lazy var tableView: UITableView = {
+        let tableView = UITableView()
+        tableView.backgroundColor = .white
+        tableView.bounces = false
+        tableView.showsVerticalScrollIndicator = false
+        tableView.register(SearchTableViewCell.self, forCellReuseIdentifier: "SearchTableViewCell")
+        tableView.delegate = self
+        tableView.dataSource = self
+        tableView.sectionHeaderTopPadding = 0
+        tableView.separatorStyle = .none
+        tableView.translatesAutoresizingMaskIntoConstraints = false
+        
+        return tableView
+    }()
+    
+    
     var searchBaseViewBottomAnchorConstraint: NSLayoutConstraint!
+    
+    let mainModel = MainModel()
+    var searchPlaceList: [SearchData] = []
+    var page: Int = 1
+    var isEnd: Bool = false
+    
+    enum SearchType {
+        case departure
+        case arrival
+    }
+    var searchType: SearchType?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -241,6 +382,7 @@ final class MainViewController: UIViewController {
         self.setSubviews()
         self.setLayouts()
         self.setUpNavigationItem()
+        self.setData()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -252,6 +394,14 @@ final class MainViewController: UIViewController {
     //    override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
     //        return .portrait
     //    }
+    
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        self.view.endEditing(true)
+        
+        self.searchBackgroundView.isHidden = true
+        self.searchBaseView.isHidden = true
+        
+    }
     
     deinit {
         print("----------------------------------- MainViewController is disposed -----------------------------------")
@@ -329,7 +479,17 @@ extension MainViewController: EssentialViewMethods {
         
         SupportingMethods.shared.addSubviews([
             self.searchTextField,
+            self.deleteTextButton,
+            self.tableView,
+            self.noResultStackView,
+            self.recentSearchBaseView,
         ], to: self.searchBaseView)
+        
+        SupportingMethods.shared.addSubviews([
+            self.recentSearchTitleLabel,
+            self.recentSearchDeleteAllButton,
+            self.recentSearchTableView,
+        ], to: self.recentSearchBaseView)
     }
     
     func setLayouts() {
@@ -509,7 +669,68 @@ extension MainViewController: EssentialViewMethods {
         NSLayoutConstraint.activate([
             self.searchTextField.leadingAnchor.constraint(equalTo: self.searchBaseView.leadingAnchor, constant: 20),
             self.searchTextField.trailingAnchor.constraint(equalTo: self.searchBaseView.trailingAnchor, constant: -20),
-            self.searchTextField.topAnchor.constraint(equalTo: self.searchBaseView.topAnchor, constant: 36)
+            self.searchTextField.topAnchor.constraint(equalTo: self.searchBaseView.topAnchor, constant: 36),
+            self.searchTextField.heightAnchor.constraint(equalToConstant: 48),
+        ])
+        
+        // deleteTextButton
+        NSLayoutConstraint.activate([
+            self.deleteTextButton.trailingAnchor.constraint(equalTo: self.searchTextField.trailingAnchor, constant: -20),
+            self.deleteTextButton.centerYAnchor.constraint(equalTo: self.searchTextField.centerYAnchor),
+            self.deleteTextButton.widthAnchor.constraint(equalToConstant: 20),
+            self.deleteTextButton.heightAnchor.constraint(equalToConstant: 20),
+        ])
+        
+        // tableView
+        NSLayoutConstraint.activate([
+            self.tableView.leadingAnchor.constraint(equalTo: self.searchBaseView.leadingAnchor),
+            self.tableView.trailingAnchor.constraint(equalTo: self.searchBaseView.trailingAnchor),
+            self.tableView.topAnchor.constraint(equalTo: self.searchTextField.bottomAnchor, constant: 22),
+            self.tableView.bottomAnchor.constraint(equalTo: self.searchBaseView.bottomAnchor),
+        ])
+        
+        // noResultStackView
+        NSLayoutConstraint.activate([
+            self.noResultStackView.centerYAnchor.constraint(equalTo: self.tableView.centerYAnchor),
+            self.noResultStackView.leadingAnchor.constraint(equalTo: self.searchBaseView.leadingAnchor, constant: 20),
+            self.noResultStackView.trailingAnchor.constraint(equalTo: self.searchBaseView.trailingAnchor, constant: -20),
+        ])
+        
+        // noResultImageView
+        NSLayoutConstraint.activate([
+            self.noResultImageView.heightAnchor.constraint(equalToConstant: 36),
+            self.noResultImageView.widthAnchor.constraint(equalToConstant: 36),
+        ])
+        
+        // recentSearchBaseView
+        NSLayoutConstraint.activate([
+            self.recentSearchBaseView.leadingAnchor.constraint(equalTo: self.searchBaseView.leadingAnchor, constant: 20),
+            self.recentSearchBaseView.trailingAnchor.constraint(equalTo: self.searchBaseView.trailingAnchor, constant: -20),
+            self.recentSearchBaseView.topAnchor.constraint(equalTo: self.searchTextField.bottomAnchor, constant: 32),
+        ])
+        
+        // recentSearchTitleLabel
+        NSLayoutConstraint.activate([
+            self.recentSearchTitleLabel.leadingAnchor.constraint(equalTo: self.recentSearchBaseView.leadingAnchor),
+            self.recentSearchTitleLabel.topAnchor.constraint(equalTo: self.recentSearchBaseView.topAnchor),
+            self.recentSearchTitleLabel.heightAnchor.constraint(equalToConstant: 20),
+        ])
+        
+        // recentSearchDeleteAllButton
+        NSLayoutConstraint.activate([
+            self.recentSearchDeleteAllButton.trailingAnchor.constraint(equalTo: self.recentSearchBaseView.trailingAnchor),
+            self.recentSearchDeleteAllButton.centerYAnchor.constraint(equalTo: self.recentSearchTitleLabel.centerYAnchor),
+            self.recentSearchDeleteAllButton.heightAnchor.constraint(equalToConstant: 16),
+            self.recentSearchDeleteAllButton.widthAnchor.constraint(equalToConstant: 47),
+        ])
+        
+        // recentSearchTableView
+        NSLayoutConstraint.activate([
+            self.recentSearchTableView.leadingAnchor.constraint(equalTo: self.recentSearchBaseView.leadingAnchor),
+            self.recentSearchTableView.trailingAnchor.constraint(equalTo: self.recentSearchBaseView.trailingAnchor),
+            self.recentSearchTableView.topAnchor.constraint(equalTo: self.recentSearchTitleLabel.bottomAnchor, constant: 10),
+            self.recentSearchTableView.bottomAnchor.constraint(equalTo: self.recentSearchBaseView.bottomAnchor, constant: -10),
+            self.recentSearchTableView.heightAnchor.constraint(equalToConstant: 168),
         ])
     }
     
@@ -540,10 +761,88 @@ extension MainViewController: EssentialViewMethods {
         self.navigationItem.leftBarButtonItem?.isEnabled = false
         self.navigationItem.rightBarButtonItem = UIBarButtonItem(image: UIImage(named: "notificationIcon")?.withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: nil)
     }
+    
+    func setData() {
+        if !SupportingMethods.shared.loadSearchList().isEmpty {
+            self.recentSearchBaseView.isHidden = false
+            
+        } else {
+            self.recentSearchBaseView.isHidden = true
+            
+        }
+        
+        self.recentSearchTableView.reloadData()
+        
+    }
+    
 }
 
 // MARK: - Extension for methods added
 extension MainViewController {
+    func loadSearchedPlaceDataRequest(page: Int, search: String, success: ((Search) -> ())?) {
+        self.mainModel.loadSearchedPlaceDataRequest( page: page, search: search) { result in
+            success?(result)
+            
+        } failure: { message in
+            SupportingMethods.shared.checkExpiration {
+                print("loadSearchedPlaceDataRequest API Error: \(message)")
+                SupportingMethods.shared.turnCoverView(.off)
+                
+            }
+            
+        }
+
+    }
+    
+    func loadSearchPlaceDataRequest(page: Int, search: String) {
+        SupportingMethods.shared.turnCoverView(.on)
+        self.loadSearchedPlaceDataRequest(page: page, search: search) { result in
+            self.page = page
+            self.isEnd = result.meta.isEnd
+            
+            if !result.meta.isEnd {
+                self.searchPlaceList += result.documents
+                
+            }
+            
+            SupportingMethods.shared.turnCoverView(.off)
+            self.tableView.reloadData()
+            
+        }
+        
+    }
+    
+    func loadSearchPlaceDataRequest(search: String) {
+        self.loadSearchedPlaceDataRequest(page: 1, search: search) { result in
+            self.page = 1
+            self.isEnd = result.meta.isEnd
+            
+            if result.documents.isEmpty {
+                self.searchPlaceList = []
+                
+                if SupportingMethods.shared.loadSearchList().isEmpty {
+                    self.noResultStackView.isHidden = false
+                    self.recentSearchBaseView.isHidden = true
+                    
+                } else {
+                    self.recentSearchBaseView.isHidden = false
+                    self.noResultStackView.isHidden = true
+                    
+                }
+                
+            } else {
+                self.recentSearchBaseView.isHidden = true
+                self.noResultStackView.isHidden = true
+                self.searchPlaceList = result.documents
+                
+            }
+            
+            SupportingMethods.shared.turnCoverView(.off)
+            self.tableView.reloadData()
+            self.recentSearchTableView.reloadData()
+            
+        }
+    }
     
 }
 
@@ -551,6 +850,8 @@ extension MainViewController {
 extension MainViewController {
     @objc func departureButton(_ sender: UIButton) {
         print("departureButton")
+        self.searchType = .departure
+        self.searchTextField.text = self.departureTextField.text
         self.searchTextField.setPlaceholder(placeholder: "출발지 검색")
         self.searchTextField.becomeFirstResponder()
         self.searchBackgroundView.isHidden = false
@@ -560,6 +861,8 @@ extension MainViewController {
     
     @objc func arrivalButton(_ sender: UIButton) {
         print("arrivalButton")
+        self.searchType = .arrival
+        self.searchTextField.text = self.arrivalTextField.text
         self.searchTextField.setPlaceholder(placeholder: "도착지 검색")
         self.searchTextField.becomeFirstResponder()
         self.searchBackgroundView.isHidden = false
@@ -598,6 +901,130 @@ extension MainViewController {
             }
             
         }
+        
+    }
+    
+    @objc func recentSearchDeleteAllButton(_ sender: UIButton) {
+        SupportingMethods.shared.saveSearchList(searchList: [])
+        self.recentSearchTableView.reloadData()
+        self.recentSearchBaseView.isHidden = true
+        
+    }
+    
+    @objc func deleteTextButton(_ sender: UIButton) {
+        self.searchTextField.text = ""
+        self.searchPlaceList.removeAll()
+        if SupportingMethods.shared.loadSearchList().isEmpty {
+            self.recentSearchBaseView.isHidden = true
+            
+        } else {
+            self.recentSearchBaseView.isHidden = false
+            
+        }
+        
+        self.tableView.reloadData()
+        self.recentSearchTableView.reloadData()
+        
+    }
+    
+}
+
+extension MainViewController: UITextFieldDelegate {
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        self.loadSearchPlaceDataRequest(search: textField.text!)
+        return true
+        
+    }
+    
+    func textFieldDidChangeSelection(_ textField: UITextField) {
+        self.loadSearchPlaceDataRequest(search: textField.text!)
+        
+        if textField.text == "" {
+            self.deleteTextButton.isHidden = true
+            
+        } else {
+            self.deleteTextButton.isHidden = false
+            
+        }
+        
+    }
+    
+}
+
+extension MainViewController: UITableViewDelegate, UITableViewDataSource {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        if tableView == self.recentSearchTableView {
+            return SupportingMethods.shared.loadSearchList().count
+            
+        } else {
+            return self.searchPlaceList.count
+            
+        }
+        
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        if tableView == self.recentSearchTableView {
+            let cell = tableView.dequeueReusableCell(withIdentifier: "RecentSearchTableViewCell", for: indexPath) as! RecentSearchTableViewCell
+            let searchPlace = SupportingMethods.shared.loadSearchList()[indexPath.row]
+            
+            cell.setCell(searchPlace: searchPlace)
+            
+            return cell
+            
+        } else {
+            let cell = tableView.dequeueReusableCell(withIdentifier: "SearchTableViewCell", for: indexPath) as! SearchTableViewCell
+            let searchPlace = self.searchPlaceList[indexPath.row]
+            
+            cell.setCell(searchPlace: searchPlace)
+            
+            if indexPath.row == self.searchPlaceList.count - 1 && !self.isEnd {
+                self.loadSearchPlaceDataRequest(page: self.page + 1, search: self.searchTextField.text!)
+                
+            }
+            
+            return cell
+            
+        }
+
+        
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        var result: SearchData!
+        if tableView == self.recentSearchTableView {
+            let searchPlace = SupportingMethods.shared.loadSearchList()[indexPath.row]
+            print(searchPlace)
+            result = searchPlace
+            
+        } else {
+            let searchPlace = self.searchPlaceList[indexPath.row]
+            var searchList = SupportingMethods.shared.loadSearchList()
+            searchList = searchList.filter({ $0.id != searchPlace.id })
+            searchList.insert(searchPlace, at: 0)
+            SupportingMethods.shared.saveSearchList(searchList: searchList)
+            self.recentSearchTableView.reloadData()
+            
+            print(searchPlace)
+            result = searchPlace
+            
+        }
+        
+        switch self.searchType {
+        case .departure:
+            // FIXME: 출발지 저장 코드 추가
+            self.departureTextField.text = result.placeName
+            
+        case .arrival:
+            // FIXME: 도착지 저장 코드 추가
+            self.arrivalTextField.text = result.placeName
+            
+        default: break
+        }
+        
+        self.searchTextField.resignFirstResponder()
+        self.searchBackgroundView.isHidden = true
+        self.searchBaseView.isHidden = true
         
     }
     

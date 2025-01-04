@@ -637,6 +637,35 @@ extension SupportingMethods {
         
         return isValid
     }
+    
+    // MARK: UserDefaults Object 저장 및 불러오기
+    func saveSearchList(searchList: [SearchData]) {
+        var searchList = searchList
+        if searchList.count > 3 {
+            searchList.removeLast()
+            
+        }
+        
+        let encoder: JSONEncoder = JSONEncoder()
+        if let searchData = try? encoder.encode(searchList) {
+            UserDefaults.standard.set(searchData, forKey: "SaveSearchData")
+            
+        }
+        
+    }
+    
+    func loadSearchList() -> [SearchData] {
+        guard let searchData = UserDefaults.standard.object(forKey: "SaveSearchData") as? Data else { return [] }
+        
+        let decoder: JSONDecoder = JSONDecoder()
+        if let searchList = try? decoder.decode([SearchData].self, from: searchData) {
+            return searchList
+            
+        } else {
+            return []
+            
+        }
+    }
 }
 
 // MARK: Date
